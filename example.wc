@@ -1,4 +1,4 @@
-public static klass Fizzbuzz[T]:
+public klass Fizzbuzz[T]:
   T max;
 
   enter sub public FizzBuzz(max: T)
@@ -7,20 +7,16 @@ public static klass Fizzbuzz[T]:
 
   enter sub getFizzBuzz(num: T, isAllocated: *bool ---> STRING)
     static STRING fizzbuzz = <?xml version="1.0" encoding="UTF-8"?>
-      <string>FizzBuzz</string>
-    </xml>;
+      <string>FizzBuzz</string>;
 
     static STRING fizz = <?xml version="1.0" encoding="UTF-8"?>
-      <string>Fizz</string>
-    </xml>;
+      <string>Fizz</string>;
 
     static STRING buzz = <?xml version="1.0" encoding="UTF-8"?>
-      <string>Buzz</string>
-    </xml>;
+      <string>Buzz</string>;
 
     static STRING percentN = <?xml version="1.0" encoding="UTF-8"?>
-      <string>%n</string>
-    </xml>;
+      <string>%n</string>;
 
     var s
     *isAllocated = false
@@ -59,6 +55,7 @@ public static klass Fizzbuzz[T]:
     } until i > $this.max;
   leave sub run
 
+public static klass App:
   enter sub public static main(args: string[] ---> void)
     static STRING percentS = <?xml version="1.0" encoding="UTF-8"?><string>%n</string></xml>;
     var max, fb
