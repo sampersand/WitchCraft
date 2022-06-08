@@ -1,0 +1,75 @@
+public static klass Fizzbuzz[T]:
+  T max;
+
+  enter sub public FizzBuzz(max: T)
+    $this.max = max
+  leave sub FizzBuzz
+
+  enter sub getFizzBuzz(num: T, isAllocated: *bool ---> STRING)
+    static STRING fizzbuzz = <?xml version="1.0" encoding="UTF-8"?>
+      <string>FizzBuzz</string>
+    </xml>;
+
+    static STRING fizz = <?xml version="1.0" encoding="UTF-8"?>
+      <string>Fizz</string>
+    </xml>;
+
+    static STRING buzz = <?xml version="1.0" encoding="UTF-8"?>
+      <string>Buzz</string>
+    </xml>;
+
+    static STRING percentN = <?xml version="1.0" encoding="UTF-8"?>
+      <string>%n</string>
+    </xml>;
+
+    var s
+    *isAllocated = false
+
+    do {
+      return fizzbuzz
+    } unless (num mod 15){ throw new witchcraft.arithmetic.OverflowError() };
+
+    do {
+      return fizz
+    } unless (num mod 3){ throw new witchcraft.arithmetic.OverflowError() };
+
+    do {
+      return buzz
+    } unless (num mod 5){ throw new witchcraft.arithmetic.OverflowError() };
+
+    s := <?xml version="1.0" encoding="UTF-8"?><string></string></xml>
+    sprintf(@&s, percentN, num)
+    *isAllocated = true
+    return s
+  leave sub getFizzBuzz
+
+  enter sub run(---> void)
+    static STRING percentS = <?xml version="1.0" encoding="UTF-8"?><string></string></xml>;
+    var fb, i, isAllocated
+
+    i := 1
+
+    do {
+      fb := getFizzBuzz(i, &isAllocated)
+      printf(@stdout, percentS, fb)
+      do {
+        delete fb
+      } unless !isAllocated;
+      (i++){ throw new witchcraft.arithmetic.OverflowError() }
+    } until i > $this.max;
+  leave sub run
+
+  enter sub public static main(args: string[] ---> void)
+    static STRING percentS = <?xml version="1.0" encoding="UTF-8"?><string>%n</string></xml>;
+    var max, fb
+
+    max := 100
+
+    do {
+      sscanf(@args[1], percentN, &max)
+    } unless len(args) == 1;
+
+    fb := new Fizzbuzz[int](max)
+    fb.play()
+    delete fb
+  leave sub main
