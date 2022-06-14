@@ -1,6 +1,5 @@
 #include "ruby.h"
 #include "extconf.h"
-#include <stdio.h>
 
 struct WcPointer {
 	struct RBasic basic;
@@ -54,10 +53,13 @@ static void wc_pointer_mark(void *raw) {
 		rb_gc_mark(ptr->value);
 }
 
+static void do_nothing(void *_) {}
+
 VALUE wc_pointer_alloc(VALUE klass) {
 	struct WcPointer *pointer = malloc(sizeof(struct WcPointer));
 	pointer->freed = true;
-	return Data_Wrap_Struct(klass, wc_pointer_mark, free, pointer);
+	return Data_Wrap_Struct(klass, do_nothing, do_nothing, pointer);
+	// return Data_Wrap_Struct(klass, wc_pointer_mark, free, pointer);
 }
 
 void Init_pointer() {
@@ -66,7 +68,9 @@ void Init_pointer() {
    rb_define_alloc_func(wc_cPointer, wc_pointer_alloc);
 	rb_define_method(wc_cPointer, "initialize", wc_pointer_initialize, -1);
 	rb_define_method(wc_cPointer, "free", wc_pointer_free, 0);
-	rb_define_method(wc_cPointer, "+@", wc_pointer_deref, 0);
-	rb_define_method(wc_cPointer, "-@", wc_pointer_ref, 0);
+	rb_define_method(wc_cPointer, "deref", wc_pointer_deref, 0);
+	rb_define_method(wc_cPointer, "ref", wc_pointer_ref, 0);
 	rb_define_method(wc_cPointer, "assign", wc_pointer_assign, 1);
+	rb_define_alias(wc_cPointer, "+@", "ref");
+	rb_define_alias(wc_cPointer, "-@", "deref");
 }
