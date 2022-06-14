@@ -2,6 +2,7 @@ java: public static, field syntax, exception name.
 scala: generics syntax
 fortran & friends: `enter sub` / `leave sub`
 rust: argument syntax
+javascript: `var`
 python: significant whitespace for function declaration, `not`/`and`/`or` keywords
 raku: `--->` return type syntax
 php: `$this`
@@ -9,3 +10,4 @@ c: variables declared at top of scope, pointers, `sprintf`/`printf`/`sscanf`
 go: `:=` declarations
 c++: `new` and `delete`
 perl: `until` and `unless`
+visual basic: `OrElse`

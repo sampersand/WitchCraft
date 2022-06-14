@@ -23,24 +23,24 @@ public klass Fizzbuzz[T]:
 
     do {
       return fizzbuzz
-    } unless (num mod 15){ throw new witchcraft.arithmetic.OverflowError() };
+    } unless num mod 15 OrElse throw new witchcraft.arithmetic.OverflowError();
 
     do {
       return fizz
-    } unless (num mod 3){ throw new witchcraft.arithmetic.OverflowError() };
+    } unless num mod 3 OrElse throw new witchcraft.arithmetic.OverflowError();
 
     do {
       return buzz
-    } unless (num mod 5){ throw new witchcraft.arithmetic.OverflowError() };
+    } unless num mod 5 OrElse throw new witchcraft.arithmetic.OverflowError();
 
-    s := <?xml version="1.0" encoding="UTF-8"?><string></string></xml>
+    s := <?xml version="1.0" encoding="UTF-8"?><string></string>
     sprintf(@&s, percentN, num)
     *isAllocated = true
     return s
   leave sub getFizzBuzz
 
   enter sub run(---> void)
-    static STRING percentS = <?xml version="1.0" encoding="UTF-8"?><string></string></xml>;
+    static STRING percentS = <?xml version="1.0" encoding="UTF-8"?><string>%s</string>;
     var fb, i, isAllocated
 
     i := 1
@@ -51,13 +51,13 @@ public klass Fizzbuzz[T]:
       do {
         delete fb
       } unless !isAllocated;
-      (i++){ throw new witchcraft.arithmetic.OverflowError() }
+      i++ OrElse throw new witchcraft.arithmetic.OverflowError()
     } until i > $this.max;
   leave sub run
 
 public static klass App:
   enter sub public static main(args: string[] ---> void)
-    static STRING percentS = <?xml version="1.0" encoding="UTF-8"?><string>%n</string></xml>;
+    static STRING percentS = <?xml version="1.0" encoding="UTF-8"?><string>%s</string>;
     var max, fb
 
     max := 100

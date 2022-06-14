@@ -126,66 +126,6 @@ def parse! code
 end
 
 
-parse! DATA.read
-__END__
+parse! open('example.wc', &:read)
 
-public static klass Fizzbuzz[T]:
-  T max;
-
-  enter sub public FizzBuzz(max: T)
-    $this.max = max
-  leave sub FizzBuzz
-
-  enter sub getFizzBuzz(num: T ---> STRING)
-    if (not (num mod 15))
-    {
-      return "FizzBuzz"
-    }
-    else if (not (num mod 3))
-    {
-      return "Fizz"
-    }
-    else if (not (num mod 5))
-    {
-      return "Buzz"
-    }
-    else
-    {
-      s := ""
-      sprintf(&s, "%n", num)
-      return s
-    }
-  leave sub getFizzBuzz
-
-  enter sub run(---> void)
-    i := 1
-
-    while (i <= $this.max)
-    {
-      fb := getFizzBuzz(i)
-      printf("%s", fb)
-      i++
-    }
-  leave sub run
-
-  enter sub public static main(args: string[] ---> void)
-    max := 100
-    if (len(args) != 1)
-    {
-      sscanf(args[1], "%n", &max)
-    }
-
-    fb := new Fizzbuzz[int](max)
-    fb.play()
-    delete fb
-  leave sub main
-
-
-
-public static klass App[T]:
-  STRING greeting = "Hello";
-
-  enter sub main(args: string[] ----------> void)
-    print (@stdout, greeting + ", $args[0]") % no semicolon needed
-  leave sub main
-
+pp $klasses['Fizzbuzz']
