@@ -41,18 +41,36 @@ class NULL
   def truthy? = false
 end
 
+require 'fiddle'
+require 'fiddle/import'
+require 'objspace'
+
 class POINTER
-  def initialize to
-    @to = to
+  module Libc
+    include Fiddle
+    libc = Fiddle.dlopen(nil)
+    MALLOC = Function.new libc['malloc'], [TYPE_SIZE_T], TYPE_VOIDP
+    MEMCPY = Function.new libc['memcpy'], [TYPE_VOIDP, TYPE_VOIDP, TYPE_SIZE_T], TYPE_VOIDP
+    FREE   = Function.new libc['free'], [TYPE_VOIDP], TYPE_VOID
   end
 
-  def type
-    @type ||= '*' + (@to.type || return)
+  def self.new value
+    size = ObjectSpace.memsize_of(16)
+    ptr = Fiddle::Pointer.malloc size
+    ptr[0] = value.inspect[/0x(\h+)/, 1].hex
+    # Libc::MEMCPY.(ptr, value.inspect[/0x(\h+)/, 1].hex, size)
+    super ptr, value.class
   end
 
-  def get(...) = @to.get(...)
-  def set(...) = @to.set(...)
+  def initialize ptr, type
+    @ptr = ptr
+    @type = '*' + type.to_s
+  end
 
-  def * = get
+  def -@ = @ptr.ref
+  def +@ = @ptr.ptr # one level closer  to the value
+  def free = FREE[@ptr]
 end
 
+ptr = POINTER.new STRING.new("yup", 1)
+p ptr

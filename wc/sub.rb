@@ -33,7 +33,6 @@ class Type
   end
 end
 
-
 class Sub
   attr_accessor :public, :static, :name, :generics, :args, :return_type, :body
   def initialize
@@ -48,8 +47,8 @@ class Sub
 
   def ($env.statics['len'] = proc { INTEGER.new _1.length }).get = itself
 
-  def run(*args, this:)
-    $env.push '$this' => this
+  def run *args, this:
+    $env.push '$this' => POINTER.new(this)
 
     unless args.length == @args.length
       raise "oops, you must call with exactly #{@args.length}, not #{args.length}" 
@@ -58,7 +57,7 @@ class Sub
     # TODO: typecheck args
 
     @args.zip(args).each do |n, a|
-      $env.last[n] = a
+      $env.last[n] = POINTER.new a
     end
 
     catch :return do
@@ -67,10 +66,10 @@ class Sub
     end
   ensure
     $env.pop.each do |k, v|
-      next if k == '$this' or @args.include? k
-      # you forgot to delete your data, now enjoy a memory leak.
-      ptr = Fiddle::Pointer.malloc ObjectSpace.memsize_of v
-      ptr[0] = v
+      # Only implicitly free arguments and `$this`
+      if k == '$this' or @args.include? k
+        v.free
+      end
     end
   end
 

@@ -10,17 +10,15 @@ public static klass App:
     max := 100
 
     do {
-      1
-      2
-      3
+      sscanf(@args[1], percentN, &max)
       l := len(argv)
-    } unless len == 1;
-      % sscanf(@args[1], percentN, &max)
+    } unless l == 1;
 
-    % fb := new Fizzbuzz[int](max)
-    % fb.play()
+    fb := new Fizzbuzz[int](max)
+    fb.play()
     delete fb
     delete max
+    delete l
   leave sub main
 
 EOS

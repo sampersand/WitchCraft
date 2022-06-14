@@ -1,0 +1,5 @@
+*.bundle
+*.o
+pointer/extconf.h
+pointer/Makefile
+pointer/mkmf.log
