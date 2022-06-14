@@ -1,6 +1,4 @@
-require_relative 'container'
 require_relative 'value'
-require 'fiddle'
 
 class Value
   def initialize(kind=nil, data=nil)
@@ -45,7 +43,10 @@ class Sub
     def self.statics = @statics
   end
 
-  def ($env.statics['len'] = proc { INTEGER.new _1.length }).get = itself
+  PREDEFINED_FUNCTIONS = {
+    'len' => POINTER.new(proc { INTEGER.new _1.length }),
+    'print' => POINTER.new(proc { puts _1 }),
+  }
 
   def run *args, this:
     $env.push '$this' => POINTER.new(this)
@@ -65,12 +66,7 @@ class Sub
       nil
     end
   ensure
-    $env.pop.each do |k, v|
-      # Only implicitly free arguments and `$this`
-      if k == '$this' or @args.include? k
-        v.free
-      end
-    end
+    $env.pop
   end
 
   private
@@ -91,13 +87,14 @@ class Sub
       @body.slice!(/\A\s*(\*\s*)*[a-zA-Z]\w*\s*/) or raise "expected type for static"
       type = $&.gsub /\s/, ''
       @body.slice!(/\A\s*\w+\s*/) or raise "expected name for static"
-      name = $&.gsub(/\s/, '').downcase
+      name = $&.gsub(/\s/, '')
       if @body.slice! /\A\s*=/
         init = @body.slice!(/\A[^;]*/) or fail "expected init after `=`"
         init = execute_expression init, @body
       end
       raise "expected `;` after static" unless @body.slice! /\A\s*;/
-      $env.statics[self][name] = Container.new type: type, value: init
+      # todo: type check the value
+      $env.statics[self][name] = POINTER.new init #type: type, value: init
     end
   end
 
@@ -105,16 +102,16 @@ class Sub
     return unless body.slice! /\A\s*var\b\s*/
 
     while body.slice! /\A\s*\w+\b/
-      $env.last[$&.strip] = Container.new
-      break unless  body.delete_prefix! ','
+      $env.last[$&.strip] = POINTER.new
+      break unless body.delete_prefix! ','
     end
   end
 
   def lookup_variable(name)
     $env.last[name] ||
-      $env.statics[name] ||
       $env.statics.dig(self, name) ||
-      $env.statics.dig($env.last['$self'], name) or fail "unknown variable #{name}"
+      $env.statics.dig($env.last['$self'], name) ||
+      PREDEFINED_FUNCTIONS[name] or fail "unknown variable #{name}"
   end
 
 
@@ -124,13 +121,13 @@ class Sub
     return execute_statement body if statement.tap(&:strip!).empty?
 
     case statement
-    when /\A((?:\*\s*)*)\s*(\w+)\s*(:)=/ then # assignment, mayb w ptrs
+    when /\A((?:\*\s*)*)\s*(\w+)\s*(:)?=/ then # assignment, mayb w ptrs
       depth = $1.length
-      container = lookup_variable $2
+      ptr = lookup_variable $2
       value = execute_expression $', body
 
-      depth.times { container = container.get }
-      container.set value, first_time: $3
+      depth.times { ptr = +ptr }
+      ptr.assign value#, first_time: $3
     when /\Areturn\b/i then throw :return, execute_expression($', body)
     when /\Adelete\b/i then
       $env.last.delete $'.strip
@@ -168,16 +165,15 @@ expression
       val.set val + if $&.include? '+' then 1 else -1 end
     when /^(\&+)\s*(\w+)$/ then
       ptr = lookup_variable $2
-      $1.length.times { ptr = POINTER.new ptr }
+      ($1.length - 1).times { ptr = POINTER.new ptr }
       ptr
+    when /^\d+$/ then INTEGER.new $&.to_i
     when /^(\**)\s*(\w+)$/ then
       val = lookup_variable $2
-      $1.length.times { val = val.get }
-      val
-
-    when /^\d+$/ then INTEGER.new $&.to_i
+      $1.length.times { val = +val }
+      +val
     when /\A(\w+)\s*\(/
-      fn = lookup_variable($1).get
+      fn = +lookup_variable($1)
       base.prepend $'
       base.slice! /^(.*?)\)/ or fail "missing closing `)`"
       args = $1.split(',').map(&:strip)
@@ -191,7 +187,14 @@ expression
       expr.slice!(/\A\s*<string>(.*?)<\/string>/) or fail "expected `<string>...</string>` after xml, gotr"
       base.replace expr
       expr.clear
-      STRING.new $1.encode!(encoding), version
+      string = $1.encode!(encoding)
+        .gsub('&quot;', %|"|)
+        .gsub('&apos;', %|'|)
+        .gsub('&lt;', %|<|)
+        .gsub('&gt;', %|>|)
+        .gsub('&amp;', %|&|)
+        .gsub('&perc;', %|%|)
+      STRING.new string, version
 
     when /\A\}\s*(unless|until)\b(.*);/i then throw :unless_or_until, [$1, $2]
     when /\Ado\s*\{/i then

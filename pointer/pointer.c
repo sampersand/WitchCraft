@@ -25,7 +25,6 @@ static VALUE wc_pointer_deref(VALUE obj) {
 	return ptr->value;
 }
 
-#define wc_pointer_initialize wc_pointer_assign
 static VALUE wc_pointer_assign(VALUE obj, VALUE value) {
 	EXTRACT(obj);
 
@@ -33,6 +32,15 @@ static VALUE wc_pointer_assign(VALUE obj, VALUE value) {
 	ptr->freed = false;
 
 	return value;
+}
+
+static VALUE wc_pointer_initialize(int argc, VALUE *argv, VALUE self) {
+	EXTRACT(self);
+
+	if (rb_check_arity(argc, 0, 1))
+		ptr->value = argv[0];
+
+	return self;
 }
 
 static VALUE wc_pointer_ref(VALUE obj) {
@@ -53,10 +61,10 @@ VALUE wc_pointer_alloc(VALUE klass) {
 }
 
 void Init_pointer() {
-	wc_cPointer = rb_define_class("Pointer", rb_cObject);
+	wc_cPointer = rb_define_class("POINTER", rb_cObject);
 
    rb_define_alloc_func(wc_cPointer, wc_pointer_alloc);
-	rb_define_method(wc_cPointer, "initialize", wc_pointer_initialize, 1);
+	rb_define_method(wc_cPointer, "initialize", wc_pointer_initialize, -1);
 	rb_define_method(wc_cPointer, "free", wc_pointer_free, 0);
 	rb_define_method(wc_cPointer, "+@", wc_pointer_deref, 0);
 	rb_define_method(wc_cPointer, "-@", wc_pointer_ref, 0);

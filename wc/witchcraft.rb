@@ -4,22 +4,31 @@ require_relative 'klass'
 parse_klasses! <<EOS; <<EOS
 public static klass App:
   enter sub public static main(argc: int, argv: *string ---> void)
-    static STRING percentS = <?xml version="1.0" encoding="UTF-8"?><string>\\Ps</string>;
-    var max, fb, l
-
-    max := 100
-
-    do {
-      sscanf(@args[1], percentN, &max)
-      l := len(argv)
-    } unless l == 1;
-
-    fb := new Fizzbuzz[int](max)
-    fb.play()
-    delete fb
-    delete max
-    delete l
+    static STRING percentS = <?xml version="1.0" encoding="UTF-8"?><string>&perc;s</string>;
+    var x, y
+    y := &x
+    *y = 12
+    print(percentS)
+    return x
   leave sub main
+
+%  enter sub public static main(argc: int, argv: *string ---> void)
+%    static STRING percentS = <?xml version="1.0" encoding="UTF-8"?><string>\\Ps</string>;
+%    var max, fb, l
+%
+%    max := 100
+%
+%    do {
+%      % sscanf(@args[1], percentN, &max)
+%      l := len(argv)
+%    } unless l == 1;
+%
+%    fb := new Fizzbuzz[int](max)
+%    fb.play()
+%    delete fb
+%    delete max
+%    delete l
+%  leave sub main
 
 EOS
 public klass Ary[t]:
